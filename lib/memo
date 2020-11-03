@@ -1,0 +1,129 @@
+class _MyAppState extends State<MyApp> {
+  Future<Currency> futureCurrency;
+
+  @override
+  void initState() {
+    super.initState();
+    futureCurrency = fetchCurrency();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Fetch Data Example',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Fetch Data Example'),
+        ),
+        body: Center(
+          child: FutureBuilder<Currency>(
+            future: futureCurrency,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Text(snapshot.data.date);
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
+
+              // By default, show a loading spinner.
+              return CircularProgressIndicator();
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+---------------------------------------------
+
+
+class Converter extends StatefulWidget {
+  @override
+  ConverterState createState() => ConverterState();
+}
+
+// Define a corresponding State class.
+// This class holds the data related to the Form.
+class ConverterState extends State<Converter> {
+  // Create a text controller and use it to retrieve the current value
+  // of the TextField.
+  final myController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    myController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Currency'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(70.0),
+        child: TextField(
+          controller: myController,
+        ),
+      ),
+      floatingActionButton: ElevatedButton(
+        // When the user presses the button, show an alert dialog containing
+        // the text that the user has entered into the text field.
+        onPressed: () {
+          return showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                // Retrieve the text the that user has entered by using the
+                // TextEditingController.
+                content: Text(myController.text),
+              );
+            },
+          );
+        },
+        child: Text('Convert'),
+      ),
+    );
+  }
+}
+
+
+----------------------------
+Future<Currency> fetchCurrency() async {
+  final response = await http.get('https://api.exchangeratesapi.io/latest');
+
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    return Currency.fromJson(jsonDecode(response.body));
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load Currency');
+  }
+}
+
+class Currency {
+  String base;
+  String date;
+  Map<String, dynamic> rates;
+
+  Currency({this.base, this.date, this.rates});
+
+  Currency.fromJson(Map<String, dynamic> json) {
+    base = json['base'];
+    date = json['date'];
+    rates = json['rates'];
+  }
+}
