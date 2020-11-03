@@ -241,7 +241,7 @@ class ConverterState extends State<Converter> {
               //print();
             },
             child: Text(
-              'Login',
+              'Convert',
               style: TextStyle(color: Colors.white, fontSize: 18.0),
             ),
           ),
